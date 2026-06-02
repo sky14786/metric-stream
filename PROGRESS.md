@@ -27,7 +27,7 @@
 ### Phase 2 — 핵심 파이프라인
 - [ ] metric-generator — 서버 메트릭 임의 생성 + Kafka produce (30초 간격)
 - [ ] metric-consumer — Kafka consume + PostgreSQL 저장
-- [ ] DB 스키마 — server_metrics 테이블
+- [ ] DB 스키마 — api_logs 테이블
 
 ### Phase 3 — API
 - [ ] metric-api — 메트릭 조회 REST API
