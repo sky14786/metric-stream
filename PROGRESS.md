@@ -26,10 +26,10 @@
 - [x] Grafana PostgreSQL 데이터소스 프로비저닝 자동 설정
 - [x] README.md 초안
 
-### Phase 2 — 핵심 파이프라인
-- [ ] metric-generator — API 로그 임의 생성 + Kafka produce (@Scheduled 30초 간격)
-- [ ] metric-consumer — Kafka consume + PostgreSQL 저장
-- [ ] DB 스키마 — api_logs 테이블 (JPA Entity + DDL)
+### Phase 2 — 핵심 파이프라인 ✅
+- [x] metric-generator — API 로그 임의 생성 + Kafka produce (5초마다 3~7개)
+- [x] metric-consumer — Kafka consume + PostgreSQL 저장
+- [x] DB 스키마 — api_logs 테이블 (JPA Entity + 인덱스)
 
 ### Phase 3 — API
 - [ ] metric-api — 메트릭 조회 REST API
@@ -62,10 +62,9 @@
 
 ## 다음 작업
 
-**Phase 2 — metric-generator부터 시작.**
+**Phase 3 — metric-api REST 엔드포인트 구현**
 
-1. `ApiLog` 도메인 모델 (공통 or generator 내부)
-2. `ApiLogProducer` — KafkaTemplate으로 JSON 직렬화 후 produce
-3. `ApiLogScheduler` — @Scheduled 30초 간격, 20개 서버 × 랜덤 로그 생성
-4. `metric-consumer` — @KafkaListener, JSON 역직렬화 → JPA 저장
-5. `ApiLog` JPA Entity + Repository
+1. `ApiLog` 조회용 Entity 참조 (consumer 모듈과 DB 공유)
+2. `GET /metrics` — 전체 조회 (페이지네이션)
+3. `GET /metrics/{serverId}` — 서버별 조회
+4. `GET /metrics/{serverId}/latest` — 최신 1건
