@@ -1,6 +1,9 @@
 spring:
   application:
     name: metric-api
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
   datasource:
     url: jdbc:postgresql://localhost:5432/metricdb
     username: metric
