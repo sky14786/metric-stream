@@ -70,10 +70,10 @@ public class ApiLogScheduler {
             "Internal server error"
     };
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 1000)
     public void generate() {
         ThreadLocalRandom rnd = ThreadLocalRandom.current();
-        int count = rnd.nextInt(3, 8);
+        int count = rnd.nextInt(10, 21);
 
         for (int i = 0; i < count; i++) {
             String serverId = SERVERS.get(rnd.nextInt(SERVERS.size()));
