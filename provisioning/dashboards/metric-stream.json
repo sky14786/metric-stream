@@ -1,0 +1,315 @@
+{
+  "title": "metric-stream",
+  "uid": "metric-stream-v1",
+  "description": "실시간 API 로그 모니터링",
+  "tags": ["metric-stream"],
+  "timezone": "browser",
+  "refresh": "10s",
+  "time": { "from": "now-30m", "to": "now" },
+  "schemaVersion": 38,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "title": "총 요청 수",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "metric-postgres" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "postgres", "uid": "metric-postgres" },
+          "rawSql": "SELECT COUNT(*) AS \"Total\" FROM api_logs WHERE $__timeFilter(timestamp)",
+          "format": "table"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "fixedColor": "blue", "mode": "fixed" },
+          "unit": "short",
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 2,
+      "title": "에러율",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "metric-postgres" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "postgres", "uid": "metric-postgres" },
+          "rawSql": "SELECT ROUND(100.0 * COUNT(*) FILTER (WHERE status_code >= 400) / NULLIF(COUNT(*), 0), 1) AS \"Error Rate\" FROM api_logs WHERE $__timeFilter(timestamp)",
+          "format": "table"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 5 },
+              { "color": "red", "value": 10 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "title": "평균 응답시간",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "metric-postgres" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "postgres", "uid": "metric-postgres" },
+          "rawSql": "SELECT ROUND(AVG(response_time_ms)::numeric, 0) AS \"Avg ms\" FROM api_logs WHERE $__timeFilter(timestamp)",
+          "format": "table"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "unit": "ms",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 200 },
+              { "color": "red", "value": 500 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "title": "분당 요청 수",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": { "type": "postgres", "uid": "metric-postgres" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "postgres", "uid": "metric-postgres" },
+          "rawSql": "SELECT date_trunc('minute', timestamp) AS time, COUNT(*) AS \"Requests/min\" FROM api_logs WHERE $__timeFilter(timestamp) GROUP BY time ORDER BY time",
+          "format": "time_series"
+        }
+      ],
+      "options": {
+        "tooltip": { "mode": "single" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 15, "showPoints": "auto" }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 5,
+      "title": "리전별 평균 응답시간",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": { "type": "postgres", "uid": "metric-postgres" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "postgres", "uid": "metric-postgres" },
+          "rawSql": "SELECT date_trunc('minute', timestamp) AS time, AVG(response_time_ms) AS \"Seoul\" FROM api_logs WHERE region = 'seoul' AND $__timeFilter(timestamp) GROUP BY time ORDER BY time",
+          "format": "time_series"
+        },
+        {
+          "refId": "B",
+          "datasource": { "type": "postgres", "uid": "metric-postgres" },
+          "rawSql": "SELECT date_trunc('minute', timestamp) AS time, AVG(response_time_ms) AS \"Busan\" FROM api_logs WHERE region = 'busan' AND $__timeFilter(timestamp) GROUP BY time ORDER BY time",
+          "format": "time_series"
+        },
+        {
+          "refId": "C",
+          "datasource": { "type": "postgres", "uid": "metric-postgres" },
+          "rawSql": "SELECT date_trunc('minute', timestamp) AS time, AVG(response_time_ms) AS \"Daejeon\" FROM api_logs WHERE region = 'daejeon' AND $__timeFilter(timestamp) GROUP BY time ORDER BY time",
+          "format": "time_series"
+        },
+        {
+          "refId": "D",
+          "datasource": { "type": "postgres", "uid": "metric-postgres" },
+          "rawSql": "SELECT date_trunc('minute', timestamp) AS time, AVG(response_time_ms) AS \"Incheon\" FROM api_logs WHERE region = 'incheon' AND $__timeFilter(timestamp) GROUP BY time ORDER BY time",
+          "format": "time_series"
+        }
+      ],
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "ms",
+          "custom": { "lineWidth": 2, "fillOpacity": 10, "showPoints": "auto" }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 6,
+      "title": "상태코드 분포",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 12 },
+      "datasource": { "type": "postgres", "uid": "metric-postgres" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "postgres", "uid": "metric-postgres" },
+          "rawSql": "SELECT status_code::text AS \"Code\", COUNT(*) AS \"Count\" FROM api_logs WHERE $__timeFilter(timestamp) GROUP BY status_code ORDER BY status_code",
+          "format": "table"
+        }
+      ],
+      "options": {
+        "pieType": "pie",
+        "tooltip": { "mode": "single" },
+        "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] }
+      },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "200" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "201" }, "properties": [{ "id": "color", "value": { "fixedColor": "teal", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "400" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "401" }, "properties": [{ "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "404" }, "properties": [{ "id": "color", "value": { "fixedColor": "semi-dark-orange", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "500" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "title": "리전별 트래픽",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 12 },
+      "datasource": { "type": "postgres", "uid": "metric-postgres" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "postgres", "uid": "metric-postgres" },
+          "rawSql": "SELECT region AS \"Region\", COUNT(*) AS \"Requests\" FROM api_logs WHERE $__timeFilter(timestamp) GROUP BY region ORDER BY \"Requests\" DESC",
+          "format": "table"
+        }
+      ],
+      "options": {
+        "orientation": "auto",
+        "groupWidth": 0.7,
+        "barWidth": 0.97,
+        "tooltip": { "mode": "single" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" } },
+        "overrides": []
+      }
+    },
+    {
+      "id": 8,
+      "title": "디바이스 타입 분포",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 12 },
+      "datasource": { "type": "postgres", "uid": "metric-postgres" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "postgres", "uid": "metric-postgres" },
+          "rawSql": "SELECT device_type AS \"Type\", COUNT(*) AS \"Count\" FROM api_logs WHERE $__timeFilter(timestamp) GROUP BY device_type ORDER BY \"Count\" DESC",
+          "format": "table"
+        }
+      ],
+      "options": {
+        "pieType": "pie",
+        "tooltip": { "mode": "single" },
+        "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] }
+      },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" } },
+        "overrides": []
+      }
+    },
+    {
+      "id": 9,
+      "title": "최근 500 에러",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 20 },
+      "datasource": { "type": "postgres", "uid": "metric-postgres" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "postgres", "uid": "metric-postgres" },
+          "rawSql": "SELECT timestamp, server_id AS \"Server\", region AS \"Region\", method AS \"Method\", endpoint AS \"Endpoint\", response_time_ms AS \"Response Time (ms)\", error_message AS \"Error\" FROM api_logs WHERE status_code = 500 AND $__timeFilter(timestamp) ORDER BY timestamp DESC LIMIT 20",
+          "format": "table"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": { "show": false }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": { "align": "auto", "displayMode": "auto" }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Response Time (ms)" },
+            "properties": [
+              { "id": "unit", "value": "ms" },
+              { "id": "custom.displayMode", "value": "color-background" },
+              { "id": "thresholds", "value": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 500 },
+                  { "color": "red", "value": 1500 }
+                ]
+              }}
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
