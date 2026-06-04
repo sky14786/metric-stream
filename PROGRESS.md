@@ -31,8 +31,8 @@
 - [x] metric-consumer — Kafka consume + PostgreSQL 저장
 - [x] DB 스키마 — api_logs 테이블 (JPA Entity + 인덱스)
 
-### Phase 3 — API
-- [ ] metric-api — 메트릭 조회 REST API
+### Phase 3 — API ✅
+- [x] metric-api — 메트릭 조회 REST API
   - `GET /metrics` — 전체 조회 (페이지네이션)
   - `GET /metrics/{serverId}` — 서버별 조회
   - `GET /metrics/{serverId}/latest` — 최신 메트릭
@@ -62,9 +62,9 @@
 
 ## 다음 작업
 
-**Phase 3 — metric-api REST 엔드포인트 구현**
+**Phase 4 — 마무리**
 
-1. `ApiLog` 조회용 Entity 참조 (consumer 모듈과 DB 공유)
-2. `GET /metrics` — 전체 조회 (페이지네이션)
-3. `GET /metrics/{serverId}` — 서버별 조회
-4. `GET /metrics/{serverId}/latest` — 최신 1건
+1. Grafana 대시보드 JSON 프로비저닝
+2. Nginx 리버스 프록시
+3. GitHub Actions CI
+4. README.md 완성
