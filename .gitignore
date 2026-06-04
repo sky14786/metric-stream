@@ -16,6 +16,7 @@ Thumbs.db
 # Spring Boot
 *.jar
 *.war
+!gradle/wrapper/gradle-wrapper.jar
 
 # Docker volumes (local)
 data/

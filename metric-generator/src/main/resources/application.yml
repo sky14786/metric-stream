@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: metric-generator
+  kafka:
+    bootstrap-servers: localhost:9094
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+metric:
+  kafka:
+    topic: server-api-logs
+
+logging:
+  level:
+    com.juneyoung: DEBUG

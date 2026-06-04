@@ -1,0 +1,5 @@
+rootProject.name = 'metric-stream'
+
+include 'metric-generator'
+include 'metric-consumer'
+include 'metric-api'
