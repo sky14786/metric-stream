@@ -1,0 +1,25 @@
+# Gradle
+.gradle/
+build/
+out/
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Spring Boot
+*.jar
+*.war
+
+# Docker volumes (local)
+data/
+
+# Logs
+*.log
+logs/
