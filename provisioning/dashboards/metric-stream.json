@@ -7,26 +7,26 @@
   "refresh": "10s",
   "time": { "from": "now-30m", "to": "now" },
   "schemaVersion": 38,
-  "version": 1,
+  "version": 2,
   "panels": [
     {
       "id": 1,
       "title": "총 요청 수",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 0 },
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
       "datasource": { "type": "postgres", "uid": "metric-postgres" },
       "targets": [
         {
           "refId": "A",
           "datasource": { "type": "postgres", "uid": "metric-postgres" },
-          "rawSql": "SELECT COUNT(*) AS \"Total\" FROM api_logs WHERE $__timeFilter(timestamp)",
-          "format": "table"
+          "rawSql": "SELECT date_trunc('minute', timestamp) AS time, COUNT(*) AS \"Requests\" FROM api_logs WHERE $__timeFilter(timestamp) GROUP BY time ORDER BY time",
+          "format": "time_series"
         }
       ],
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "reduceOptions": { "calcs": ["sum"] },
         "colorMode": "background",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "center",
         "orientation": "auto",
         "textMode": "auto"
@@ -42,9 +42,40 @@
     },
     {
       "id": 2,
+      "title": "에러 건수",
+      "type": "stat",
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "postgres", "uid": "metric-postgres" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "postgres", "uid": "metric-postgres" },
+          "rawSql": "SELECT date_trunc('minute', timestamp) AS time, COUNT(*) AS \"Errors\" FROM api_logs WHERE status_code >= 400 AND $__timeFilter(timestamp) GROUP BY time ORDER BY time",
+          "format": "time_series"
+        }
+      ],
+      "options": {
+        "reduceOptions": { "calcs": ["sum"] },
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "fixedColor": "red", "mode": "fixed" },
+          "unit": "short",
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }] }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
       "title": "에러율",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 0 },
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 0 },
       "datasource": { "type": "postgres", "uid": "metric-postgres" },
       "targets": [
         {
@@ -79,10 +110,10 @@
       }
     },
     {
-      "id": 3,
+      "id": 4,
       "title": "평균 응답시간",
       "type": "stat",
-      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 0 },
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 0 },
       "datasource": { "type": "postgres", "uid": "metric-postgres" },
       "targets": [
         {
@@ -117,16 +148,56 @@
       }
     },
     {
-      "id": 4,
-      "title": "분당 요청 수",
+      "id": 5,
+      "title": "시간대별 요청 수",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "gridPos": { "h": 9, "w": 16, "x": 0, "y": 5 },
       "datasource": { "type": "postgres", "uid": "metric-postgres" },
       "targets": [
         {
           "refId": "A",
           "datasource": { "type": "postgres", "uid": "metric-postgres" },
-          "rawSql": "SELECT date_trunc('minute', timestamp) AS time, COUNT(*) AS \"Requests/min\" FROM api_logs WHERE $__timeFilter(timestamp) GROUP BY time ORDER BY time",
+          "rawSql": "SELECT date_trunc('minute', timestamp) AS time, COUNT(*) AS \"전체 요청\" FROM api_logs WHERE $__timeFilter(timestamp) GROUP BY time ORDER BY time",
+          "format": "time_series"
+        },
+        {
+          "refId": "B",
+          "datasource": { "type": "postgres", "uid": "metric-postgres" },
+          "rawSql": "SELECT date_trunc('minute', timestamp) AS time, COUNT(*) AS \"에러\" FROM api_logs WHERE status_code >= 400 AND $__timeFilter(timestamp) GROUP BY time ORDER BY time",
+          "format": "time_series"
+        }
+      ],
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 20, "showPoints": "never", "gradientMode": "opacity" }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "에러" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } },
+              { "id": "custom.fillOpacity", "value": 10 }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "title": "에러율 추이",
+      "type": "timeseries",
+      "gridPos": { "h": 9, "w": 8, "x": 16, "y": 5 },
+      "datasource": { "type": "postgres", "uid": "metric-postgres" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "postgres", "uid": "metric-postgres" },
+          "rawSql": "SELECT date_trunc('minute', timestamp) AS time, ROUND(100.0 * COUNT(*) FILTER (WHERE status_code >= 400) / NULLIF(COUNT(*), 0), 1) AS \"Error Rate %\" FROM api_logs WHERE $__timeFilter(timestamp) GROUP BY time ORDER BY time",
           "format": "time_series"
         }
       ],
@@ -136,17 +207,143 @@
       },
       "fieldConfig": {
         "defaults": {
-          "color": { "mode": "palette-classic" },
-          "custom": { "lineWidth": 2, "fillOpacity": 15, "showPoints": "auto" }
+          "color": { "fixedColor": "orange", "mode": "fixed" },
+          "unit": "percent",
+          "min": 0,
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 25,
+            "showPoints": "never",
+            "gradientMode": "opacity",
+            "thresholdsStyle": { "mode": "line" }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 5 },
+              { "color": "red", "value": 10 }
+            ]
+          }
         },
         "overrides": []
       }
     },
     {
-      "id": 5,
+      "id": 7,
+      "title": "상태코드 분포",
+      "type": "piechart",
+      "gridPos": { "h": 9, "w": 8, "x": 0, "y": 14 },
+      "datasource": { "type": "postgres", "uid": "metric-postgres" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "postgres", "uid": "metric-postgres" },
+          "rawSql": "SELECT status_code::text AS \"Code\", COUNT(*) AS \"Count\" FROM api_logs WHERE $__timeFilter(timestamp) GROUP BY status_code ORDER BY status_code",
+          "format": "table"
+        }
+      ],
+      "options": {
+        "pieType": "donut",
+        "tooltip": { "mode": "single" },
+        "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] }
+      },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" } },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "200" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "201" }, "properties": [{ "id": "color", "value": { "fixedColor": "teal", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "400" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "401" }, "properties": [{ "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "404" }, "properties": [{ "id": "color", "value": { "fixedColor": "semi-dark-orange", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "500" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "title": "디바이스 타입",
+      "type": "piechart",
+      "gridPos": { "h": 9, "w": 7, "x": 8, "y": 14 },
+      "datasource": { "type": "postgres", "uid": "metric-postgres" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "postgres", "uid": "metric-postgres" },
+          "rawSql": "SELECT device_type AS \"Type\", COUNT(*) AS \"Count\" FROM api_logs WHERE $__timeFilter(timestamp) GROUP BY device_type ORDER BY \"Count\" DESC",
+          "format": "table"
+        }
+      ],
+      "options": {
+        "pieType": "donut",
+        "tooltip": { "mode": "single" },
+        "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] }
+      },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" } },
+        "overrides": []
+      }
+    },
+    {
+      "id": 9,
+      "title": "엔드포인트별 요청 TOP 10",
+      "type": "barchart",
+      "gridPos": { "h": 9, "w": 9, "x": 15, "y": 14 },
+      "datasource": { "type": "postgres", "uid": "metric-postgres" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "postgres", "uid": "metric-postgres" },
+          "rawSql": "SELECT endpoint AS \"Endpoint\", COUNT(*) AS \"Requests\" FROM api_logs WHERE $__timeFilter(timestamp) GROUP BY endpoint ORDER BY \"Requests\" DESC LIMIT 10",
+          "format": "table"
+        }
+      ],
+      "options": {
+        "orientation": "horizontal",
+        "groupWidth": 0.7,
+        "barWidth": 0.8,
+        "tooltip": { "mode": "single" },
+        "legend": { "displayMode": "hidden" },
+        "xTickLabelRotation": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "fixedColor": "purple", "mode": "fixed" }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 10,
+      "title": "리전별 트래픽",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 23 },
+      "datasource": { "type": "postgres", "uid": "metric-postgres" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "postgres", "uid": "metric-postgres" },
+          "rawSql": "SELECT region AS \"Region\", COUNT(*) AS \"Requests\" FROM api_logs WHERE $__timeFilter(timestamp) GROUP BY region ORDER BY \"Requests\" DESC",
+          "format": "table"
+        }
+      ],
+      "options": {
+        "orientation": "auto",
+        "groupWidth": 0.7,
+        "barWidth": 0.9,
+        "tooltip": { "mode": "single" },
+        "legend": { "displayMode": "hidden" }
+      },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" } },
+        "overrides": []
+      }
+    },
+    {
+      "id": 11,
       "title": "리전별 평균 응답시간",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 23 },
       "datasource": { "type": "postgres", "uid": "metric-postgres" },
       "targets": [
         {
@@ -182,97 +379,16 @@
         "defaults": {
           "color": { "mode": "palette-classic" },
           "unit": "ms",
-          "custom": { "lineWidth": 2, "fillOpacity": 10, "showPoints": "auto" }
+          "custom": { "lineWidth": 2, "fillOpacity": 8, "showPoints": "never", "gradientMode": "opacity" }
         },
         "overrides": []
       }
     },
     {
-      "id": 6,
-      "title": "상태코드 분포",
-      "type": "piechart",
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 12 },
-      "datasource": { "type": "postgres", "uid": "metric-postgres" },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": { "type": "postgres", "uid": "metric-postgres" },
-          "rawSql": "SELECT status_code::text AS \"Code\", COUNT(*) AS \"Count\" FROM api_logs WHERE $__timeFilter(timestamp) GROUP BY status_code ORDER BY status_code",
-          "format": "table"
-        }
-      ],
-      "options": {
-        "pieType": "pie",
-        "tooltip": { "mode": "single" },
-        "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] }
-      },
-      "fieldConfig": {
-        "defaults": { "color": { "mode": "palette-classic" } },
-        "overrides": [
-          { "matcher": { "id": "byName", "options": "200" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
-          { "matcher": { "id": "byName", "options": "201" }, "properties": [{ "id": "color", "value": { "fixedColor": "teal", "mode": "fixed" } }] },
-          { "matcher": { "id": "byName", "options": "400" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] },
-          { "matcher": { "id": "byName", "options": "401" }, "properties": [{ "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }] },
-          { "matcher": { "id": "byName", "options": "404" }, "properties": [{ "id": "color", "value": { "fixedColor": "semi-dark-orange", "mode": "fixed" } }] },
-          { "matcher": { "id": "byName", "options": "500" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }
-        ]
-      }
-    },
-    {
-      "id": 7,
-      "title": "리전별 트래픽",
-      "type": "barchart",
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 12 },
-      "datasource": { "type": "postgres", "uid": "metric-postgres" },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": { "type": "postgres", "uid": "metric-postgres" },
-          "rawSql": "SELECT region AS \"Region\", COUNT(*) AS \"Requests\" FROM api_logs WHERE $__timeFilter(timestamp) GROUP BY region ORDER BY \"Requests\" DESC",
-          "format": "table"
-        }
-      ],
-      "options": {
-        "orientation": "auto",
-        "groupWidth": 0.7,
-        "barWidth": 0.97,
-        "tooltip": { "mode": "single" },
-        "legend": { "displayMode": "list", "placement": "bottom" }
-      },
-      "fieldConfig": {
-        "defaults": { "color": { "mode": "palette-classic" } },
-        "overrides": []
-      }
-    },
-    {
-      "id": 8,
-      "title": "디바이스 타입 분포",
-      "type": "piechart",
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 12 },
-      "datasource": { "type": "postgres", "uid": "metric-postgres" },
-      "targets": [
-        {
-          "refId": "A",
-          "datasource": { "type": "postgres", "uid": "metric-postgres" },
-          "rawSql": "SELECT device_type AS \"Type\", COUNT(*) AS \"Count\" FROM api_logs WHERE $__timeFilter(timestamp) GROUP BY device_type ORDER BY \"Count\" DESC",
-          "format": "table"
-        }
-      ],
-      "options": {
-        "pieType": "pie",
-        "tooltip": { "mode": "single" },
-        "legend": { "displayMode": "table", "placement": "right", "values": ["value", "percent"] }
-      },
-      "fieldConfig": {
-        "defaults": { "color": { "mode": "palette-classic" } },
-        "overrides": []
-      }
-    },
-    {
-      "id": 9,
+      "id": 12,
       "title": "최근 500 에러",
       "type": "table",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 20 },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 31 },
       "datasource": { "type": "postgres", "uid": "metric-postgres" },
       "targets": [
         {
@@ -307,6 +423,18 @@
                 ]
               }}
             ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Server" },
+            "properties": [{ "id": "custom.width", "value": 110 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Region" },
+            "properties": [{ "id": "custom.width", "value": 90 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Method" },
+            "properties": [{ "id": "custom.width", "value": 70 }]
           }
         ]
       }
