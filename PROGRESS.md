@@ -41,6 +41,10 @@
 
 ### Phase 4 — 마무리 (진행 중)
 - [x] Grafana 대시보드 JSON 프로비저닝 (12개 패널)
+- [x] PostgreSQL 호스트 포트 5432 → 6432 변경 (Hyper-V 동적 포트 예약 충돌 대응)
+- [x] Grafana 익명 접근 + 임베딩 허용 설정 (GF_AUTH_ANONYMOUS_ENABLED, GF_SECURITY_ALLOW_EMBEDDING)
+- [x] 패널 타이틀 단축 (총 요청 수→요청 수, 에러 건수→에러 수, 평균 응답시간→응답시간)
+- [x] resume-ai v7 Projects 섹션에 Grafana 임베딩 (카드 프리뷰 + 모달 fullscreen 대시보드)
 - [ ] Nginx 리버스 프록시 docker-compose에 추가
 - [ ] GitHub Actions CI (빌드 + 테스트)
 - [ ] README.md 완성 (아키텍처 다이어그램 포함)
@@ -69,6 +73,11 @@
 - [x] MetricController (GET /metrics, /{serverId}, /{serverId}/latest)
 - [x] ApiLogResponse DTO (record), ApiLogRepository (metric-api)
 
+### Phase 4 — 추가 작업 (2026-06-05)
+- [x] PostgreSQL 호스트 포트 6432로 변경, application.yml 동기화
+- [x] Grafana 익명 접근 + 임베딩 허용 (docker-compose env 추가)
+- [x] 패널 타이틀 단축, resume-ai v7에 d-solo iframe + 모달 임베딩 완료
+
 ### Phase 4 (2026-06-05)
 - [x] Grafana 대시보드 12개 패널 프로비저닝
   - Stat: 총 요청 수(스파크라인) / 에러 건수(스파크라인) / 에러율 / 평균 응답시간
@@ -85,3 +94,6 @@
 1. Nginx 리버스 프록시 (docker-compose에 추가)
 2. GitHub Actions CI (Gradle 빌드)
 3. README.md 완성 (아키텍처 다이어그램 포함)
+
+**이후 작업**
+- Oracle Cloud Free Tier 배포 (공개 URL 확보 후 resume-ai 링크 교체)

@@ -11,7 +11,7 @@
   "panels": [
     {
       "id": 1,
-      "title": "총 요청 수",
+      "title": "요청 수",
       "type": "stat",
       "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
       "datasource": { "type": "postgres", "uid": "metric-postgres" },
@@ -42,7 +42,7 @@
     },
     {
       "id": 2,
-      "title": "에러 건수",
+      "title": "에러 수",
       "type": "stat",
       "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 },
       "datasource": { "type": "postgres", "uid": "metric-postgres" },
@@ -111,7 +111,7 @@
     },
     {
       "id": 4,
-      "title": "평균 응답시간",
+      "title": "응답시간",
       "type": "stat",
       "gridPos": { "h": 5, "w": 6, "x": 18, "y": 0 },
       "datasource": { "type": "postgres", "uid": "metric-postgres" },

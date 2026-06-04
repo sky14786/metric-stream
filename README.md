@@ -27,7 +27,7 @@
 | 역할 | 기술 |
 |------|------|
 | 언어 / 프레임워크 | Java 17, Spring Boot 3.3 |
-| 메시지 브로커 | Apache Kafka 3.7 (KRaft 모드) |
+| 메시지 브로커 | Apache Kafka 3.9 (KRaft 모드) |
 | 데이터베이스 | PostgreSQL 16 |
 | 모니터링 | Grafana 10.4 |
 | 빌드 | Gradle 8.8 (멀티모듈) |
@@ -53,7 +53,7 @@ docker compose up kafka postgres grafana
 | 서비스 | 접속 주소 |
 |--------|-----------|
 | Kafka (IDE용) | localhost:9094 |
-| PostgreSQL | localhost:5432 |
+| PostgreSQL | localhost:6432 |
 | Grafana | http://localhost:3000 (admin / admin) |
 
 ### 2. 각 모듈 실행 (IntelliJ 또는 Gradle)
