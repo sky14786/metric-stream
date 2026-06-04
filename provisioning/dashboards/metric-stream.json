@@ -243,6 +243,17 @@
           "format": "table"
         }
       ],
+      "transformations": [
+        {
+          "id": "rowsToFields",
+          "options": {
+            "mappings": [
+              { "fieldName": "Code", "handlerKey": "field.name" },
+              { "fieldName": "Count", "handlerKey": "field.value" }
+            ]
+          }
+        }
+      ],
       "options": {
         "pieType": "donut",
         "tooltip": { "mode": "single" },
@@ -274,6 +285,17 @@
           "format": "table"
         }
       ],
+      "transformations": [
+        {
+          "id": "rowsToFields",
+          "options": {
+            "mappings": [
+              { "fieldName": "Type", "handlerKey": "field.name" },
+              { "fieldName": "Count", "handlerKey": "field.value" }
+            ]
+          }
+        }
+      ],
       "options": {
         "pieType": "donut",
         "tooltip": { "mode": "single" },
@@ -299,6 +321,7 @@
         }
       ],
       "options": {
+        "xField": "Endpoint",
         "orientation": "horizontal",
         "groupWidth": 0.7,
         "barWidth": 0.8,
@@ -328,6 +351,7 @@
         }
       ],
       "options": {
+        "xField": "Region",
         "orientation": "auto",
         "groupWidth": 0.7,
         "barWidth": 0.9,
