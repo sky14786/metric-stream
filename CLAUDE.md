@@ -25,7 +25,7 @@
 
 ## 프로젝트 배경
 
-MAI-WACS(350대 서버 실시간 로그 수집 파이프라인) 실무 경험 기반 토이 프로젝트.
+대규모 서버 환경 실시간 로그 수집 파이프라인 실무 경험 기반 토이 프로젝트.
 
 실무: `Telegraf → Kafka → Flink → TimescaleDB`
 이 프로젝트: `API 로그 생성기(임의) → Kafka → Spring Boot Consumer → PostgreSQL`
