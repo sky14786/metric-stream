@@ -1,6 +1,9 @@
 spring:
   application:
     name: metric-consumer
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
   kafka:
     bootstrap-servers: localhost:9094
     consumer:
