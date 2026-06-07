@@ -96,3 +96,46 @@ CREATE TABLE api_logs (
     timestamp        TIMESTAMPTZ NOT NULL
 );
 ```
+
+## 로그 형식
+
+Kafka 토픽 `server-api-logs`에 발행되는 메시지 샘플 (JSON):
+
+```json
+{
+  "requestId": "a3f2c1d4-8e7b-4a9f-b2c3-1d4e5f6a7b8c",
+  "serverId": "server-007",
+  "region": "seoul",
+  "method": "GET",
+  "endpoint": "/api/orders",
+  "statusCode": 200,
+  "responseTimeMs": 142,
+  "requestSize": 512,
+  "responseSize": 4096,
+  "deviceType": "MOBILE",
+  "errorMessage": null,
+  "timestamp": "2026-06-07T09:31:22.481Z"
+}
+```
+
+500 에러 케이스 (`errorMessage` 포함):
+
+```json
+{
+  "requestId": "9b8c7d6e-5f4a-3b2c-1d0e-9f8a7b6c5d4e",
+  "serverId": "server-014",
+  "region": "daejeon",
+  "method": "POST",
+  "endpoint": "/api/auth/login",
+  "statusCode": 500,
+  "responseTimeMs": 1823,
+  "requestSize": 256,
+  "responseSize": 128,
+  "deviceType": "DESKTOP",
+  "errorMessage": "Database connection failed",
+  "timestamp": "2026-06-07T09:31:23.105Z"
+}
+```
+
+생성 규칙: 1초마다 10~20개 / 20개 서버, 4개 리전(seoul·busan·daejeon·incheon), 10개 엔드포인트 조합  
+상태코드 분포: 200(65%) · 201(10%) · 400(8%) · 404(8%) · 401(4%) · 500(5%)
