@@ -3,8 +3,8 @@ services:
     image: apache/kafka:3.9.0
     container_name: metric-kafka
     ports:
-      - "9092:9092"   # Docker 내부 통신용
-      - "9094:9094"   # 로컬 IDE 앱 접속용
+      - "9092:9092"
+      - "9094:9094"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
@@ -17,10 +17,21 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+      KAFKA_HEAP_OPTS: "-Xmx256m -Xms128m"
     volumes:
       - kafka-data:/var/lib/kafka/data
     networks:
       - metric-net
+    healthcheck:
+      test: ["CMD", "/opt/kafka/bin/kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 384m
 
   postgres:
     image: postgres:16
@@ -35,6 +46,15 @@ services:
       - postgres-data:/var/lib/postgresql/data
     networks:
       - metric-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U metric -d metricdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 192m
 
   grafana:
     image: grafana/grafana:10.4.0
@@ -46,14 +66,110 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_NAME=Main Org.
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
       - GF_SECURITY_ALLOW_EMBEDDING=true
     volumes:
       - ./provisioning:/etc/grafana/provisioning
       - grafana-data:/var/lib/grafana
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - metric-net
+    deploy:
+      resources:
+        limits:
+          memory: 192m
+
+  # --- production 프로필: GCP 배포 시에만 기동 ---
+  # 로컬 개발: docker compose up -d
+  # GCP 배포:  docker compose --profile production up -d
+
+  generator:
+    profiles: [production]
+    build:
+      context: .
+      dockerfile: Dockerfile.generator
+    container_name: metric-generator
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - metric-net
+    deploy:
+      resources:
+        limits:
+          memory: 192m
+    restart: unless-stopped
+
+  consumer:
+    profiles: [production]
+    build:
+      context: .
+      dockerfile: Dockerfile.consumer
+    container_name: metric-consumer
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/metricdb
+      - SPRING_DATASOURCE_USERNAME=metric
+      - SPRING_DATASOURCE_PASSWORD=metric1234
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - metric-net
+    deploy:
+      resources:
+        limits:
+          memory: 192m
+    restart: unless-stopped
+
+  api:
+    profiles: [production]
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: metric-api
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/metricdb
+      - SPRING_DATASOURCE_USERNAME=metric
+      - SPRING_DATASOURCE_PASSWORD=metric1234
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - metric-net
+    deploy:
+      resources:
+        limits:
+          memory: 192m
+    restart: unless-stopped
+
+  nginx:
+    profiles: [production]
+    image: nginx:alpine
+    container_name: metric-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - grafana
+    networks:
+      - metric-net
+    deploy:
+      resources:
+        limits:
+          memory: 32m
+    restart: unless-stopped
 
 networks:
   metric-net:

@@ -1,0 +1,9 @@
+FROM gradle:8.8-jdk17-alpine AS build
+WORKDIR /workspace
+COPY . .
+RUN gradle :metric-generator:bootJar -x test --no-daemon
+
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY --from=build /workspace/metric-generator/build/libs/*.jar app.jar
+ENTRYPOINT ["java", "-Xmx128m", "-Xms64m", "-jar", "app.jar"]
