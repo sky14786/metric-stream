@@ -1,99 +1,90 @@
-# metric-stream — 작업 진행 현황
+﻿# metric-stream ???묒뾽 吏꾪뻾 ?꾪솴
 
-## ⚠️ 세션 규칙 (필수)
-> **기능 하나 완성될 때마다 즉시:**
-> 1. `PROGRESS.md` 작업 내역 및 다음 할 일 업데이트
-> 2. 변경 파일 전체 GitHub 커밋 & 푸시
-> 3. `README.md` 변경 내용 반영
-> 4. 다음 세션 시작 시 `CLAUDE.md` → 이 파일 순서로 읽고 이어서 작업
+## ?좑툘 ?몄뀡 洹쒖튃 (?꾩닔)
+> **湲곕뒫 ?섎굹 ?꾩꽦???뚮쭏??利됱떆:**
+> 1. `PROGRESS.md` ?묒뾽 ?댁뿭 諛??ㅼ쓬 ?????낅뜲?댄듃
+> 2. 蹂寃??뚯씪 ?꾩껜 GitHub 而ㅻ컠 & ?몄떆
+> 3. `README.md` 蹂寃??댁슜 諛섏쁺
+> 4. ?ㅼ쓬 ?몄뀡 ?쒖옉 ??`CLAUDE.md` ?????뚯씪 ?쒖꽌濡??쎄퀬 ?댁뼱???묒뾽
 
 ---
 
-## 프로젝트 개요
+## ?꾨줈?앺듃 媛쒖슂
 
-- **목적**: 실시간 서버 API 로그 수집 파이프라인 토이 프로젝트 (포트폴리오)
+- **紐⑹쟻**: ?ㅼ떆媛??쒕쾭 API 濡쒓렇 ?섏쭛 ?뚯씠?꾨씪???좎씠 ?꾨줈?앺듃 (?ы듃?대━??
 - **GitHub**: https://github.com/sky14786/metric-stream
-- **스택**: Java 17, Spring Boot 3.3.5, Kafka 3.9 (KRaft, apache/kafka), PostgreSQL 16, Grafana 10.4, Docker Compose
-- **배포 목표**: Oracle Cloud Free Tier (ARM VM)
+- **?ㅽ깮**: Java 17, Spring Boot 3.3.5, Kafka 3.9 (KRaft, apache/kafka), PostgreSQL 16, Grafana 10.4, Docker Compose
+- **諛고룷 紐⑺몴**: Oracle Cloud Free Tier (ARM VM)
 
 ---
 
-## 구현 단계
+## 援ы쁽 ?④퀎
 
-### Phase 1 — 기반 구성 ✅
-- [x] 프로젝트 멀티 모듈 구조 생성 (metric-generator, metric-consumer, metric-api)
-- [x] docker-compose.yml — Kafka (KRaft), PostgreSQL, Grafana
-- [x] Grafana PostgreSQL 데이터소스 프로비저닝 자동 설정
-- [x] README.md 초안
+### Phase 1 ??湲곕컲 援ъ꽦 ??- [x] ?꾨줈?앺듃 硫??紐⑤뱢 援ъ“ ?앹꽦 (metric-generator, metric-consumer, metric-api)
+- [x] docker-compose.yml ??Kafka (KRaft), PostgreSQL, Grafana
+- [x] Grafana PostgreSQL ?곗씠?곗냼???꾨줈鍮꾩????먮룞 ?ㅼ젙
+- [x] README.md 珥덉븞
 
-### Phase 2 — 핵심 파이프라인 ✅
-- [x] metric-generator — API 로그 임의 생성 + Kafka produce (1초마다 10~20개, 분당 ~900건)
-  - 20개 서버 / 4개 리전 고정 매핑 / 가중치 기반 상태코드 분포
-  - 필드: requestId, serverId, region, endpoint, method, statusCode, responseTimeMs, requestSize, responseSize, deviceType, errorMessage, timestamp
-- [x] metric-consumer — Kafka consume + PostgreSQL 저장
-- [x] DB 스키마 — api_logs 테이블 (JPA Entity + timestamp/serverId/region 인덱스)
+### Phase 2 ???듭떖 ?뚯씠?꾨씪????- [x] metric-generator ??API 濡쒓렇 ?꾩쓽 ?앹꽦 + Kafka produce (1珥덈쭏??10~20媛? 遺꾨떦 ~900嫄?
+  - 20媛??쒕쾭 / 4媛?由ъ쟾 怨좎젙 留ㅽ븨 / 媛以묒튂 湲곕컲 ?곹깭肄붾뱶 遺꾪룷
+  - ?꾨뱶: requestId, serverId, region, endpoint, method, statusCode, responseTimeMs, requestSize, responseSize, deviceType, errorMessage, timestamp
+- [x] metric-consumer ??Kafka consume + PostgreSQL ???- [x] DB ?ㅽ궎留???api_logs ?뚯씠釉?(JPA Entity + timestamp/serverId/region ?몃뜳??
 
-### Phase 3 — API ✅
-- [x] metric-api — 메트릭 조회 REST API (포트 8080)
-  - `GET /metrics` — 전체 조회 (페이지네이션, 최신순)
-  - `GET /metrics/{serverId}` — 서버별 조회
-  - `GET /metrics/{serverId}/latest` — 최신 1건
-
-### Phase 4 — 마무리 (진행 중)
-- [x] Grafana 대시보드 JSON 프로비저닝 (12개 패널)
-- [x] PostgreSQL 호스트 포트 5432 → 6432 변경 (Hyper-V 동적 포트 예약 충돌 대응)
-- [x] Grafana 익명 접근 + 임베딩 허용 설정 (GF_AUTH_ANONYMOUS_ENABLED, GF_SECURITY_ALLOW_EMBEDDING)
-- [x] 패널 타이틀 단축 (총 요청 수→요청 수, 에러 건수→에러 수, 평균 응답시간→응답시간)
-- [x] resume-ai v7 Projects 섹션에 Grafana 임베딩 (카드 프리뷰 + 모달 fullscreen 대시보드)
-- [ ] Nginx 리버스 프록시 docker-compose에 추가
-- [ ] GitHub Actions CI (빌드 + 테스트)
-- [ ] README.md 완성 (아키텍처 다이어그램 포함)
+### Phase 3 ??API ??- [x] metric-api ??硫뷀듃由?議고쉶 REST API (?ы듃 8080)
+  - `GET /metrics` ???꾩껜 議고쉶 (?섏씠吏?ㅼ씠?? 理쒖떊??
+  - `GET /metrics/{serverId}` ???쒕쾭蹂?議고쉶
+  - `GET /metrics/{serverId}/latest` ??理쒖떊 1嫄?
+### Phase 4 ??留덈Т由?(吏꾪뻾 以?
+- [x] Grafana ??쒕낫??JSON ?꾨줈鍮꾩???(12媛??⑤꼸)
+- [x] PostgreSQL ?몄뒪???ы듃 5432 ??6432 蹂寃?(Hyper-V ?숈쟻 ?ы듃 ?덉빟 異⑸룎 ???
+- [x] Grafana ?듬챸 ?묎렐 + ?꾨쿋???덉슜 ?ㅼ젙 (GF_AUTH_ANONYMOUS_ENABLED, GF_SECURITY_ALLOW_EMBEDDING)
+- [x] ?⑤꼸 ??댄? ?⑥텞 (珥??붿껌 ?섃넂?붿껌 ?? ?먮윭 嫄댁닔?믪뿉???? ?됯퇏 ?묐떟?쒓컙?믪쓳?듭떆媛?
+- [x] resume-ai v7 Projects ?뱀뀡??Grafana ?꾨쿋??(移대뱶 ?꾨━酉?+ 紐⑤떖 fullscreen ??쒕낫??
+- [ ] Nginx 由щ쾭???꾨줉??docker-compose??異붽?
+- [ ] GitHub Actions CI (鍮뚮뱶 + ?뚯뒪??
+- [ ] README.md ?꾩꽦 (?꾪궎?띿쿂 ?ㅼ씠?닿렇???ы븿)
 
 ---
 
-## 완료된 작업
+## ?꾨즺???묒뾽
 
 ### Phase 1 (2026-06-05)
-- [x] GitHub 레포 생성 (MIT 라이센스)
-- [x] CLAUDE.md, PROGRESS.md 작성
-- [x] docker-compose.yml — Kafka KRaft (apache/kafka:3.9.0), PostgreSQL 16, Grafana 10.4
-  - Kafka 이중 리스너: 9092(Docker 내부) / 9094(로컬 IDE)
+- [x] GitHub ?덊룷 ?앹꽦 (MIT ?쇱씠?쇱뒪)
+- [x] CLAUDE.md, PROGRESS.md ?묒꽦
+- [x] docker-compose.yml ??Kafka KRaft (apache/kafka:3.9.0), PostgreSQL 16, Grafana 10.4
+  - Kafka ?댁쨷 由ъ뒪?? 9092(Docker ?대?) / 9094(濡쒖뺄 IDE)
 - [x] Grafana provisioning/datasources/datasource.yml
-- [x] Gradle 멀티모듈 구조 + 각 모듈 메인 클래스 + application.yml
-- [x] README.md 초안
+- [x] Gradle 硫?곕え??援ъ“ + 媛?紐⑤뱢 硫붿씤 ?대옒??+ application.yml
+- [x] README.md 珥덉븞
 
 ### Phase 2 (2026-06-05)
 - [x] ApiLog DTO (generator), ApiLog JPA Entity (consumer)
-- [x] ApiLogProducer (KafkaTemplate), ApiLogScheduler (@Scheduled 1초)
+- [x] ApiLogProducer (KafkaTemplate), ApiLogScheduler (@Scheduled 1珥?
 - [x] ApiLogConsumer (@KafkaListener), ApiLogRepository
-- [x] JacksonConfig @Bean (generator, consumer 공통)
-- [x] 동작 확인: Grafana Explore에서 분당 ~900건 적재 확인
+- [x] JacksonConfig @Bean (generator, consumer 怨듯넻)
+- [x] ?숈옉 ?뺤씤: Grafana Explore?먯꽌 遺꾨떦 ~900嫄??곸옱 ?뺤씤
 
 ### Phase 3 (2026-06-05)
 - [x] MetricController (GET /metrics, /{serverId}, /{serverId}/latest)
 - [x] ApiLogResponse DTO (record), ApiLogRepository (metric-api)
 
-### Phase 4 — 추가 작업 (2026-06-05)
-- [x] PostgreSQL 호스트 포트 6432로 변경, application.yml 동기화
-- [x] Grafana 익명 접근 + 임베딩 허용 (docker-compose env 추가)
-- [x] 패널 타이틀 단축, resume-ai v7에 d-solo iframe + 모달 임베딩 완료
+### Phase 4 ??異붽? ?묒뾽 (2026-06-05)
+- [x] PostgreSQL ?몄뒪???ы듃 6432濡?蹂寃? application.yml ?숆린??- [x] Grafana ?듬챸 ?묎렐 + ?꾨쿋???덉슜 (docker-compose env 異붽?)
+- [x] ?⑤꼸 ??댄? ?⑥텞, resume-ai v7??d-solo iframe + 紐⑤떖 ?꾨쿋???꾨즺
 
 ### Phase 4 (2026-06-05)
-- [x] Grafana 대시보드 12개 패널 프로비저닝
-  - Stat: 총 요청 수(스파크라인) / 에러 건수(스파크라인) / 에러율 / 평균 응답시간
-  - Time series: 시간대별 요청+에러 오버레이 / 에러율 추이 / 리전별 평균 응답시간
-  - Donut: 상태코드 분포 / 디바이스 타입
-  - Bar: 엔드포인트 TOP 10 / 리전별 트래픽
-  - Table: 최근 500 에러 (응답시간 컬러 배경)
+- [x] Grafana ??쒕낫??12媛??⑤꼸 ?꾨줈鍮꾩???  - Stat: 珥??붿껌 ???ㅽ뙆?щ씪?? / ?먮윭 嫄댁닔(?ㅽ뙆?щ씪?? / ?먮윭??/ ?됯퇏 ?묐떟?쒓컙
+  - Time series: ?쒓컙?蹂??붿껌+?먮윭 ?ㅻ쾭?덉씠 / ?먮윭??異붿씠 / 由ъ쟾蹂??됯퇏 ?묐떟?쒓컙
+  - Donut: ?곹깭肄붾뱶 遺꾪룷 / ?붾컮?댁뒪 ???  - Bar: ?붾뱶?ъ씤??TOP 10 / 由ъ쟾蹂??몃옒??  - Table: 理쒓렐 500 ?먮윭 (?묐떟?쒓컙 而щ윭 諛곌꼍)
 
 ---
 
-## 다음 작업
+## ?ㅼ쓬 ?묒뾽
 
-**Phase 4 마무리**
-1. Nginx 리버스 프록시 (docker-compose에 추가)
-2. GitHub Actions CI (Gradle 빌드)
-3. README.md 완성 (아키텍처 다이어그램 포함)
+**Phase 4 留덈Т由?*
+1. Nginx 由щ쾭???꾨줉??(docker-compose??異붽?)
+2. GitHub Actions CI (Gradle 鍮뚮뱶)
+3. README.md ?꾩꽦 (?꾪궎?띿쿂 ?ㅼ씠?닿렇???ы븿)
 
-**이후 작업**
-- Oracle Cloud Free Tier 배포 (공개 URL 확보 후 resume-ai 링크 교체)
+**?댄썑 ?묒뾽**
+- Oracle Cloud Free Tier 諛고룷 (怨듦컻 URL ?뺣낫 ??resume-ai 留곹겕 援먯껜)
