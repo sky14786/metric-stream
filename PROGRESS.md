@@ -48,20 +48,22 @@
 - [x] nginx proxy_pass 경로 유지로 리다이렉트 루프 해결
 - [x] docker-compose.yml 메모리 상향 (VM 환경 OOM 대응)
 - [x] 전체 파이프라인 기동 확인 (https://skydev.ddns.net/metric)
+- [x] /redstone 경로 추가 (proxy-net 공유 네트워크, nginx subpath 라우팅)
+- [x] nginx sub_filter로 redstone 앱 절대경로 → /redstone/ 접두사 자동 교체
+- [x] resume-ai Grafana iframe URL → https://skydev.ddns.net/metric 변경
 
 ---
 
 ## 다음 작업
 
-1. **Grafana 대시보드 확인**
-   - 데이터가 실시간으로 쌓이는지 확인
-   - 패널 정상 표시 여부 확인
+1. **certbot 자동 갱신 확인**
+   - `sudo certbot renew --dry-run`
 
 2. **No-IP 30일마다 갱신 확인**
    - 이메일로 활성 확인 안 하면 호스트 삭제됨
 
-3. **certbot 자동 갱신 확인**
-   - `sudo certbot renew --dry-run`
+3. **VM 재부팅 후 컨테이너 자동 재시작 확인**
+   - restart: unless-stopped 설정 돼 있음
 
 ---
 
