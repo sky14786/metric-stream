@@ -5,7 +5,7 @@
 실시간 서버 API 로그 수집 파이프라인 토이 프로젝트.  
 대규모 서버 환경의 실시간 로그 수집 실무 경험을 기반으로 구현.
 
-**Live Demo**: https://skymetric.ddns.net
+**Live Demo**: https://skydev.ddns.net/metric
 
 ## 아키텍처
 
@@ -15,7 +15,7 @@
                                                                           Grafana
                                                                               ↓
                                                                     Nginx (HTTPS)
-                                                               https://skymetric.ddns.net
+                                                             https://skydev.ddns.net/metric
 ```
 
 ## 스택
@@ -28,7 +28,7 @@
 | 모니터링 | Grafana 10.4 |
 | 빌드 | Gradle 8.8 (멀티모듈) |
 | 인프라 | Docker Compose, Nginx |
-| 배포 | GCP e2-micro (Always Free) |
+| 배포 | VirtualBox Ubuntu Server (로컬 홈서버) |
 | CI | GitHub Actions |
 
 ## 모듈 구성
