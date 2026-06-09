@@ -145,6 +145,8 @@
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - grafana
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - metric-net
     deploy:
