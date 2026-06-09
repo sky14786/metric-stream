@@ -31,7 +31,7 @@
     deploy:
       resources:
         limits:
-          memory: 384m
+          memory: 512m
     restart: unless-stopped
 
   postgres:
@@ -55,7 +55,7 @@
     deploy:
       resources:
         limits:
-          memory: 192m
+          memory: 384m
     restart: unless-stopped
 
   grafana:
@@ -83,7 +83,7 @@
     deploy:
       resources:
         limits:
-          memory: 192m
+          memory: 384m
     restart: unless-stopped
 
   # --- production 프로필: GCP 배포 시에만 기동 ---
@@ -106,7 +106,7 @@
     deploy:
       resources:
         limits:
-          memory: 192m
+          memory: 512m
     restart: unless-stopped
 
   consumer:
@@ -130,7 +130,7 @@
     deploy:
       resources:
         limits:
-          memory: 192m
+          memory: 512m
     restart: unless-stopped
 
   nginx:
