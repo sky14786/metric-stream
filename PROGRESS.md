@@ -51,19 +51,16 @@
 - [x] /redstone 경로 추가 (proxy-net 공유 네트워크, nginx subpath 라우팅)
 - [x] nginx sub_filter로 redstone 앱 절대경로 → /redstone/ 접두사 자동 교체
 - [x] resume-ai Grafana iframe URL → https://skydev.ddns.net/metric 변경
+- [x] certbot 자동 갱신 훅 설정 (pre: nginx stop, post: nginx start)
+- [x] VM 재부팅 후 전체 컨테이너 자동 복구 확인 (8개)
 
 ---
 
 ## 다음 작업
 
-1. **certbot 자동 갱신 확인**
-   - `sudo certbot renew --dry-run`
-
-2. **No-IP 30일마다 갱신 확인**
-   - 이메일로 활성 확인 안 하면 호스트 삭제됨
-
-3. **VM 재부팅 후 컨테이너 자동 재시작 확인**
-   - restart: unless-stopped 설정 돼 있음
+1. **No-IP 30일마다 갱신** (주기적 수동 작업)
+   - no-ip.com 로그인 → Hosts → skydev.ddns.net Confirm
+   - 갱신 안 하면 호스트 삭제됨
 
 ---
 
