@@ -54,6 +54,17 @@
 - [x] certbot 자동 갱신 훅 설정 (pre: nginx stop, post: nginx start)
 - [x] VM 재부팅 후 전체 컨테이너 자동 복구 확인 (8개)
 
+### Phase 5 — redstone 연동 및 resume-ai 보완 ✅
+- [x] redstone sell.html `currentOrigin` 버그 수정 (절대 경로로 변경, 아이템 종류 로딩 정상화)
+- [x] redstone sub_filter backtick 템플릿 리터럴 패턴 추가 (`` `/ `` → `` `/redstone/ ``)
+- [x] redstone 게스트 계정 생성 + MongoDB `mainCharacter` 필드 수정 (isLoggedIn 버그 해결)
+- [x] redstone 드랍테이블/초보자 육성 가이드 링크 비활성화 (`href="#" onclick="return false;"`)
+- [x] redstone 타이틀 전체 변경 — SERVER_NAME=붉은보석, HTML 16개 파일 RedStone → 붉은보석
+- [x] resume-ai redstone 프로젝트 카드 추가 (스크린샷, 게스트 크레덴셜, 라이브 데모 링크)
+- [x] resume-ai AI 구현 태그/노트 추가 (metric-stream & redstone 카드 공통)
+- [x] resume-ai Discord.js 태그 제거
+- [x] resume-ai 프로젝트 기간 레이블 수정 (진행 중 → 개인 토이 프로젝트)
+
 ---
 
 ## 다음 작업
@@ -61,6 +72,9 @@
 1. **No-IP 30일마다 갱신** (주기적 수동 작업)
    - no-ip.com 로그인 → Hosts → skydev.ddns.net Confirm
    - 갱신 안 하면 호스트 삭제됨
+2. **worktree 브랜치 → main 병합** (nginx 변경사항 main 반영)
+   - VM에서: `git pull origin main` 후 재기동
+3. **resume-ai KakaoTalk 링크** — `KAKAO_LINK_HERE` 실제 링크로 교체
 
 ---
 
