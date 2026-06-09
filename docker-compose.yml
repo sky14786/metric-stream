@@ -145,10 +145,9 @@
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - grafana
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     networks:
       - metric-net
+      - proxy-net
     deploy:
       resources:
         limits:
@@ -158,6 +157,8 @@
 networks:
   metric-net:
     driver: bridge
+  proxy-net:
+    external: true
 
 volumes:
   kafka-data:
