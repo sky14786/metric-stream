@@ -1,4 +1,4 @@
-package com.juneyoung.metricstream.generator.scheduler;
+﻿package com.juneyoung.metricstream.generator.scheduler;
 
 import com.juneyoung.metricstream.generator.domain.ApiLog;
 import com.juneyoung.metricstream.generator.producer.ApiLogProducer;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashSet;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
@@ -70,8 +70,8 @@ public class ApiLogScheduler {
     // 불안정 상태: 500(30%) 400(20%) 401(10%) 404(5%) 200(30%) 201(5%)
     private static final int[] DEGRADED_STATUS_POOL = buildDegradedStatusPool();
 
-    // 현재 불안정 서버 목록 (90초마다 갱신)
-    private final Set<String> degradedServers = ConcurrentHashMap.newKeySet();
+    // 현재 불안정 서버 목록 (90초마다 원자적으로 교체)
+    private volatile Set<String> degradedServers = Set.of();
 
     // ── 로그 생성 ──────────────────────────────────────────
 
@@ -120,11 +120,12 @@ public class ApiLogScheduler {
     @Scheduled(fixedDelay = 90_000)
     public void updateServerHealth() {
         ThreadLocalRandom rnd = ThreadLocalRandom.current();
-        degradedServers.clear();
+        Set<String> next = new HashSet<>();
         int n = rnd.nextInt(3); // 0~2개 서버 불안정
         for (int i = 0; i < n; i++) {
-            degradedServers.add(SERVERS.get(rnd.nextInt(SERVERS.size())));
+            next.add(SERVERS.get(rnd.nextInt(SERVERS.size())));
         }
+        degradedServers = Set.copyOf(next);
         if (!degradedServers.isEmpty()) {
             log.warn("Server health update — degraded: {}", degradedServers);
         }

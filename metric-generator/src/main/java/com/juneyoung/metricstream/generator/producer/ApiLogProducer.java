@@ -1,4 +1,4 @@
-package com.juneyoung.metricstream.generator.producer;
+﻿package com.juneyoung.metricstream.generator.producer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,8 +23,14 @@ public class ApiLogProducer {
     public void send(ApiLog apiLog) {
         try {
             String message = objectMapper.writeValueAsString(apiLog);
-            kafkaTemplate.send(topic, apiLog.getServerId(), message);
-            log.debug("Sent | {} {} {} {}ms", apiLog.getServerId(), apiLog.getMethod(), apiLog.getEndpoint(), apiLog.getResponseTimeMs());
+            kafkaTemplate.send(topic, apiLog.getServerId(), message)
+                    .whenComplete((result, ex) -> {
+                        if (ex != null) {
+                            log.error("Send failed | serverId={} topic={}", apiLog.getServerId(), topic, ex);
+                        } else {
+                            log.debug("Sent | {} {} {} {}ms", apiLog.getServerId(), apiLog.getMethod(), apiLog.getEndpoint(), apiLog.getResponseTimeMs());
+                        }
+                    });
         } catch (JsonProcessingException e) {
             log.error("Serialization failed for serverId={}", apiLog.getServerId(), e);
         }
