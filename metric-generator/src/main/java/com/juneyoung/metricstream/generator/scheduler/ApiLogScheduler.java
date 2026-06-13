@@ -1,4 +1,4 @@
-﻿package com.juneyoung.metricstream.generator.scheduler;
+package com.juneyoung.metricstream.generator.scheduler;
 
 import com.juneyoung.metricstream.generator.domain.ApiLog;
 import com.juneyoung.metricstream.generator.producer.ApiLogProducer;
