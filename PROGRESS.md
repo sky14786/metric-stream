@@ -49,12 +49,18 @@
 - [x] docker-compose.yml 메모리 상향 (VM 환경 OOM 대응)
 - [x] 전체 파이프라인 기동 확인 (https://skydev.ddns.net/metric)
 
+### 이번 세션 완료 (2026-06-16) — Grafana NoData 장애 조치
+- [x] resume-ai 로컬 미리보기에서 Grafana 패널이 NoData로 뜨는 문제 발견
+- [x] 원인 확인 — `generator`, `consumer` 서비스가 `docker-compose.yml`에서 `profiles:[production]`로 묶여 있어, `--profile production` 없이 `up`하면 안 뜸. 이 PC에서는 kafka/postgres/grafana만 떠 있고 generator/consumer는 컨테이너 자체가 없는 상태 → 9일간(2026-06-07~06-16) 신규 데이터 적재 중단
+- [x] `docker compose -f docker-compose.yml -f docker-compose.local.yml --profile production up -d generator consumer` 로 재기동, 실시간 적재 재개 확인 (재기동 직후 max(timestamp) ≈ now())
+- ⚠️ **재발 방지 필요**: 로컬 PC 재부팅 시 이 두 컨테이너가 다시 빠질 수 있음 — 정기적으로 `docker ps`에 generator/consumer가 보이는지, postgres `max(timestamp)`가 최신인지 확인할 것
+
 ---
 
 ## 다음 작업
 
 1. **Grafana 대시보드 확인**
-   - 데이터가 실시간으로 쌓이는지 확인
+   - 데이터가 실시간으로 쌓이는지 확인 (generator/consumer 컨테이너가 떠있는지 `docker ps`로 같이 확인)
    - 패널 정상 표시 여부 확인
 
 2. **No-IP 30일마다 갱신 확인**
