@@ -55,6 +55,12 @@
 - [x] `docker compose -f docker-compose.yml -f docker-compose.local.yml --profile production up -d generator consumer` 로 재기동, 실시간 적재 재개 확인 (재기동 직후 max(timestamp) ≈ now())
 - ⚠️ **재발 방지 필요**: 로컬 PC 재부팅 시 이 두 컨테이너가 다시 빠질 수 있음 — 정기적으로 `docker ps`에 generator/consumer가 보이는지, postgres `max(timestamp)`가 최신인지 확인할 것
 
+### 이번 세션 완료 (2026-06-17) — Grafana WebSocket 연결 실패 수정
+- [x] 브라우저 콘솔에 `WebSocket connection to 'wss://skydev.ddns.net/metric/api/live/ws' failed` 에러 확인
+- [x] 원인 — `nginx/nginx.conf`의 `/metric/` 프록시 설정에 WebSocket 업그레이드 헤더(`Upgrade`, `Connection`)가 없어서 Grafana 실시간 라이브 연결이 일반 HTTP로 처리되어 실패
+- [x] `map $http_upgrade $connection_upgrade` 추가 + `/metric/` location에 `proxy_http_version 1.1`, `proxy_set_header Upgrade`, `proxy_set_header Connection $connection_upgrade` 추가
+- ⚠️ **VM 재배포 필요**: 이 PC에는 로컬 nginx 컨테이너가 없어(원격 VM에서만 동작) 코드만 수정됨. 실제 적용을 위해 VM(admin@trade, 192.168.0.26)에서 `git pull` 후 nginx 컨테이너 재기동(`docker compose up -d --force-recreate nginx` 등) 필요
+
 ---
 
 ## 다음 작업
