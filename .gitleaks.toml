@@ -1,0 +1,27 @@
+# gitleaks 설정. CI(.github/workflows/ci.yml)의 secret-scan 잡이 이 파일을 읽는다.
+#
+# 기본 룰셋을 그대로 쓰고, 이 저장소가 의도적으로 커밋해 둔 로컬 개발용 기본값만
+# 예외로 둔다. 경로가 아니라 **값 자체**를 예외로 두는 이유: 경로를 통째로 빼면
+# 그 파일에 새로 들어온 진짜 시크릿도 함께 못 보게 된다.
+#
+# 여기 적힌 값들은 아래 추적 파일에 평문으로 들어 있다.
+#   docker-compose.yml            POSTGRES_PASSWORD, SPRING_DATASOURCE_PASSWORD,
+#                                 GF_SECURITY_ADMIN_PASSWORD
+#   docker-compose.local.yml      GF_SECURITY_ADMIN_PASSWORD
+#   metric-api/src/main/resources/application.yml        spring.datasource.password
+#   metric-consumer/src/main/resources/application.yml   spring.datasource.password
+#   provisioning/datasources/datasource.yml              password
+#
+# 이 예외는 억제이지 해결이 아니다. 값을 환경변수 보간으로 옮기면 해당 항목을 지운다.
+
+title = "metric-stream gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "로컬 개발용 기본 자격증명 (외부 노출 배포에서는 사용 금지)"
+regexes = [
+  '''metric1234''',
+  '''GF_SECURITY_ADMIN_PASSWORD=admin''',
+]

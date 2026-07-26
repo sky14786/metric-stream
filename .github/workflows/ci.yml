@@ -26,3 +26,19 @@ jobs:
 
       - name: Build
         run: gradle build -x test --no-daemon
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 작업 트리만 검사한다(--no-git). 히스토리가 깨끗한지 아직 확인하지 않았기
+      # 때문이다 — 확인 후에는 --no-git 을 떼면 전체 히스토리를 본다.
+      # 로컬 확인: docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.18.4 \
+      #             detect --source /repo --redact
+      # 로컬 개발용 기본 자격증명 예외는 .gitleaks.toml 에 값 단위로 선언돼 있다.
+      - name: 시크릿 스캔 (작업 트리)
+        run: |
+          docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.18.4 \
+            detect --no-git --source /repo --config /repo/.gitleaks.toml \
+            --redact --verbose
