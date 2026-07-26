@@ -1,0 +1,9 @@
+# Windows에서 편집하다 WSL로 옮겨오며 작업 트리가 CRLF가 되어, 손대지 않은 파일들이
+# modified로 뜨는 상태였다. 저장소에는 LF로만 저장하도록 고정한다.
+* text=auto eol=lf
+
+# gradlew.bat 은 Windows 배치 파일이라 CRLF를 유지해야 한다.
+gradlew.bat text eol=crlf
+
+*.jar binary
+*.png binary
