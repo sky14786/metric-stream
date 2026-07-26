@@ -3,35 +3,23 @@
 ## 세션 시작 시 필수
 > **`CLAUDE.md` → `PROGRESS.md`** 순서로 읽고 작업 시작.
 
----
-
-## 사용자 프로필
-
-- **이름**: 김준영 (JuneYoung Kim) / GitHub: https://github.com/sky14786
-- **경력**: 5년+ 백엔드/인프라 엔지니어 (SI/솔루션)
-- **주요 스택**: Spring Boot · Java · MySQL/MariaDB/PostgreSQL · Redis · Kafka · RabbitMQ · Flink · Docker · Nginx · Jenkins · Shell Script
-- **성향**: 운영 안정성 우선. 혼자 전체 시스템 운영·문제해결에 강점. GitHub 개인 프로젝트 부족 → 이 프로젝트가 포트폴리오 역할.
-
----
-
-## 개발 환경
-
-- **OS**: Windows 11 (PowerShell 사용 — bash 명령어 지양)
-- **Docker**: x86/x64 환경
-- **빌드 도구**: Gradle (멀티모듈)
-- **언어**: Java 17 + Spring Boot 3
+환경·커밋·시크릿·코드 작성 원칙은 상위 `~/project/CLAUDE.md`에 있고 이 세션에도 함께
+로드됩니다(2026-07-26 실측). 이 파일에는 **metric-stream에만 해당하는 것**만 둡니다.
 
 ---
 
 ## 프로젝트 배경
 
 대규모 서버 환경 실시간 로그 수집 파이프라인 실무 경험 기반 토이 프로젝트.
+**포트폴리오 역할**을 겸하므로, 동작만 하는 것보다 남에게 보여줄 수 있는 구성을 택합니다.
 
 실무: `Telegraf → Kafka → Flink → TimescaleDB`
 이 프로젝트: `API 로그 생성기(임의) → Kafka → Spring Boot Consumer → PostgreSQL`
 
 - Telegraf 역할 → Spring Boot @Scheduled 임의 API 로그 생성으로 대체
 - Flink → Spring Boot Consumer로 단순화
+
+**스택**: Java 17 · Spring Boot 3 · Gradle 멀티모듈 · Kafka · PostgreSQL
 
 ---
 
@@ -74,19 +62,10 @@ metric-stream/
 
 ---
 
-## 세션 규칙
-
-기능 완성마다 즉시:
-1. `git commit & push`
-2. `PROGRESS.md` 업데이트
-3. `README.md` 업데이트
-4. 스택·아키텍처 변경 시 `CLAUDE.md` 업데이트
-
----
-
 ## 코딩 컨벤션
 
 - 패키지: `com.juneyoung.metricstream`
 - 클래스명: PascalCase + 역할 명시 (`ApiLogProducer`, `ApiLogConsumerService`)
 - 불필요한 주석 없음 — WHY가 명확할 때만 작성
-- 커밋 prefix: `feat:` `fix:` `docs:` `chore:`
+
+스택·아키텍처가 바뀌면 이 파일도 같이 고칩니다.
